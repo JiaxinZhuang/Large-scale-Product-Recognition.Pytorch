@@ -27,7 +27,7 @@ cd Deit
 
 cp -r /path/to/TFR-aliproduct_train /dev/shm/
 cp -r /path/to/TFR-aliproduct_val /dev/shm/
-cp -r /youtu-reid/ericxian/aliproduct/*.txt /dev/shm/
+cp -r /path/to/*.txt /dev/shm/
 
 python3 -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --model deit_small_patch16_224 --version _v9 --train --lr 5e-5 --epochs 100 2>&1 | tee ./logs/std.log
 ```
