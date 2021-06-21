@@ -1,0 +1,53 @@
+# 训练任务的名字, 对应机智平台上的任务名称, 同时对应 机智平台上的模型文件名字, 对于同样训练代码, 最好使用同样的名字
+# 名字不能有空格,非'^[A-Z|a-z|0-9|_|-|\.]{2,48}$'的特殊字符.
+name: DeitS-Ali-f-tf-v4-r2-lr5e-5
+
+#任务跑的机器数目 和 每个机器的GPU个数
+worker_num: 1
+gpu_num_per_worker: 8
+
+#机智平台上的业务标示, 通过rpf-jcli query 的 free_gpu 查看业务当前空余资源
+jizhi_business: youtu_lowsource_chongqing
+
+# 数据集， 从http://jizhi.oa.com/#/Dataset 获得
+dataset: youtu-reid-rw
+
+#使用的镜像名字,参考 https://git.code.oa.com/yt-rapidflow/docker_images
+image_full_name: "mirrors.tencent.com/rpf/pytorch:1.6.0"
+
+# 任务结束后是否释放资源，对于调试任务保留现场，设置为True
+release_ip: False
+
+# ------------
+# lightrun 启动命令配置 参考： https://git.code.oa.com/yt-rapidflow/lightrun    
+## 日志存储目录, 对于微信集群 设置为 task_out
+log_dir: ./logs
+#log_level: INFO
+
+## 自定义环境变量
+envs: 
+  - "NCCL_DEBUG=INFO"
+  - "NCCL_LAUNCH_MODE=GROUP"
+  - "NCCL_DEBUG_SUBSYS=INIT"
+
+## 启动初始化命令
+# setup：
+# - "nvidia-smi"
+
+## command 执行方式  mpi, hvd, rpf_mpi, multi_node, multi_gpu
+template: multi_node
+
+setup:
+    - "cp -r /youtu-reid/ericxian/aliproduct/TFR-aliproduct_train /dev/shm/"
+    - "cp -r /youtu-reid/ericxian/aliproduct/TFR-aliproduct_val /dev/shm/"
+    - "cp -r /youtu-reid/ericxian/aliproduct/*.txt /dev/shm/"
+
+#
+## 训练执行命令
+command:
+    - "export PYTHONWARNINGS='ignore:semaphore_tracker:UserWarning'"
+    - "export http_proxy='http://star-proxy.oa.com:3128'"
+    - "export https_proxy='http://star-proxy.oa.com:3128'"
+    - 
+      "export no_proxy='mirrors.cloud.tencent.com,tlinux-mirror.tencent-cloud.com,tlinux-mirrorlist.tencent-cloud.com,localhost,127.0.0.1,mirrors-tlinux.tencentyun.com,.oa.com,.local,.3gqq.com,.7700.org,.ad.com,.ada_sixjoy.com,.addev.com,.app.local,.apps.local,.aurora.com,.autotest123.com,.bocaiwawa.com,.boss.com,.cdc.com,.cdn.com,.cds.com,.cf.com,.cjgc.local,.cm.com,.code.com,.datamine.com,.dvas.com,.dyndns.tv,.ecc.com,.expochart.cn,.expovideo.cn,.fms.com,.great.com,.hadoop.sec,.heme.com,.home.com,.hotbar.com,.ibg.com,.ied.com,.ieg.local,.ierd.com,.imd.com,.imoss.com,.isd.com,.isoso.com,.itil.com,.kao5.com,.kf.com,.kitty.com,.lpptp.com,.m.com,.matrix.cloud,.matrix.net,.mickey.com,.mig.local,.mqq.com,.oiweb.com,.okbuy.isddev.com,.oss.com,.otaworld.com,.paipaioa.com,.qqbrowser.local,.qqinternal.com,.qqwork.com,.rtpre.com,.sc.oa.com,.sec.com,.server.com,.service.com,.sjkxinternal.com,.sllwrnm5.cn,.sng.local,.soc.com,.t.km,.tcna.com,.teg.local,.tencentvoip.com,.tenpayoa.com,.test.air.tenpay.com,.tr.com,.tr_autotest123.com,.vpn.com,.wb.local,.webdev.com,.webdev2.com,.wizard.com,.wqq.com,.wsd.com,.sng.com,.music.lan,.mnet2.com,.tencentb2.com,.tmeoa.com,.pcg.com,www.wip3.adobe.com,www-mm.wip3.adobe.com,mirrors.tencent.com,csighub.tencentyun.com'"
+    - "python3 -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --model deit_small_patch16_224 --version _v4 --lr 5e-5 2>&1 | tee ./logs/std.log"
