@@ -31,3 +31,11 @@ cp -r /path/to/*.txt /dev/shm/
 
 python3 -m torch.distributed.launch --nproc_per_node=8 --use_env main.py --model deit_small_patch16_224 --version _v9 --train --lr 5e-5 --epochs 100 2>&1 | tee ./logs/std.log
 ```
+
+
+
+## TFRecord
+
+[V4](https://drive.google.com/file/d/194bmtyOeZ39-EbE_jmAs78wDtF0EeWFN/view?usp=sharing)
+
+[V9](https://drive.google.com/file/d/1Ad8s5ytnLLIVWIjZQSmGveb39T9rQpzJ/view?usp=sharing)
